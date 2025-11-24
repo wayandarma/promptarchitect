@@ -91,13 +91,17 @@ interface SectionProps {
   title: string;
   children: React.ReactNode;
   icon?: React.ReactNode;
+  rightElement?: React.ReactNode;
 }
 
-export const Section: React.FC<SectionProps> = ({ title, children, icon }) => (
+export const Section: React.FC<SectionProps> = ({ title, children, icon, rightElement }) => (
   <div className="bg-dark-800/50 rounded-xl border border-dark-700 overflow-hidden mb-6 backdrop-blur-sm">
-    <div className="bg-dark-800/80 px-4 py-3 border-b border-dark-700 flex items-center gap-2">
-      <span className="text-brand-400">{icon}</span>
-      <h3 className="font-medium text-slate-200 text-sm tracking-wide">{title}</h3>
+    <div className="bg-dark-800/80 px-4 py-3 border-b border-dark-700 flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <span className="text-brand-400">{icon}</span>
+        <h3 className="font-medium text-slate-200 text-sm tracking-wide">{title}</h3>
+      </div>
+      {rightElement && <div>{rightElement}</div>}
     </div>
     <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
       {children}

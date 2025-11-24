@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FolderOpen, Save, Trash2, Download } from 'lucide-react';
-import { PromptType, SavedTemplate, ImagePromptState, TextPromptState } from '../types';
+import { FolderOpen, Save, Trash2, Download, Dices } from 'lucide-react';
+import { PromptType, SavedTemplate, ImagePromptState, TextPromptState, SelectOption } from '../types';
 import { Section } from './Controls';
+import {
+  ART_STYLES, COLOR_PALETTES, LIGHTING_OPTIONS, CAMERA_ANGLES,
+  SHOT_TYPES, RESOLUTIONS, ASPECT_RATIOS, ENVIRONMENTS, MOODS,
+  PURPOSES, WRITING_STYLES, TONES, LENGTHS
+} from '../constants';
 
 interface TemplateManagerProps {
   activeTab: PromptType;
@@ -10,6 +15,14 @@ interface TemplateManagerProps {
 }
 
 const STORAGE_KEY = 'prompt_architect_templates';
+
+// Inline constants for fields not in constants.ts but used in ImageBuilder
+const TIME_OF_DAY_OPTS: SelectOption[] = [
+  {label: 'Day', value: 'day'}, {label: 'Night', value: 'night'}, {label: 'Sunset', value: 'sunset'}
+];
+const DEPTH_OF_FIELD_OPTS: SelectOption[] = [
+  {label: 'Shallow (Bokeh)', value: 'shallow depth of field, bokeh'}, {label: 'Deep Focus', value: 'deep focus'}
+];
 
 export const TemplateManager: React.FC<TemplateManagerProps> = ({ activeTab, currentState, onLoad }) => {
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
@@ -64,9 +77,61 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({ activeTab, cur
     setSelectedTemplateId('');
   };
 
+  const getRandomValue = (options: SelectOption[]) => {
+    // Filter out empty values (usually "Default")
+    const validOptions = options.filter(opt => opt.value !== '');
+    if (validOptions.length === 0) return '';
+    const randomIndex = Math.floor(Math.random() * validOptions.length);
+    return validOptions[randomIndex].value;
+  };
+
+  const handleRandomize = () => {
+    const newState = { ...currentState };
+    
+    if (activeTab === PromptType.IMAGE) {
+      const imgState = newState as ImagePromptState;
+      // Randomize Image Parameters
+      imgState.environment = getRandomValue(ENVIRONMENTS);
+      imgState.timeOfDay = Math.random() > 0.3 ? getRandomValue(TIME_OF_DAY_OPTS) : ''; // 70% chance of setting time
+      imgState.artStyle = getRandomValue(ART_STYLES);
+      imgState.colorPalette = getRandomValue(COLOR_PALETTES);
+      imgState.lighting = getRandomValue(LIGHTING_OPTIONS);
+      imgState.mood = getRandomValue(MOODS);
+      imgState.cameraAngle = getRandomValue(CAMERA_ANGLES);
+      imgState.shotType = getRandomValue(SHOT_TYPES);
+      imgState.resolution = getRandomValue(RESOLUTIONS);
+      imgState.aspectRatio = getRandomValue(ASPECT_RATIOS);
+      // 50% chance for depth of field
+      imgState.depthOfField = Math.random() > 0.5 ? getRandomValue(DEPTH_OF_FIELD_OPTS) : ''; 
+      
+    } else {
+      const txtState = newState as TextPromptState;
+      // Randomize Text Parameters
+      txtState.purpose = getRandomValue(PURPOSES);
+      txtState.writingStyle = getRandomValue(WRITING_STYLES);
+      txtState.tone = getRandomValue(TONES);
+      txtState.length = getRandomValue(LENGTHS);
+    }
+    
+    onLoad(newState);
+  };
+
   return (
     <div className="mb-6 animate-fadeIn">
-      <Section title="Template Library" icon={<FolderOpen size={18} />}>
+      <Section 
+        title="Template Library" 
+        icon={<FolderOpen size={18} />}
+        rightElement={
+          <button 
+            onClick={handleRandomize} 
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 hover:text-brand-300 text-xs font-medium transition-colors border border-brand-500/20"
+            title="Randomize Parameters (keeps text input)"
+          >
+            <Dices size={14} />
+            <span>Randomize</span>
+          </button>
+        }
+      >
         <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Load Section */}
