@@ -1,0 +1,5 @@
+{
+  "name": "PromptArchitect",
+  "description": "A professional-grade visual prompt builder for AI image and text generation models, featuring real-time preview, JSON export, and preset management.",
+  "requestFramePermissions": []
+}
